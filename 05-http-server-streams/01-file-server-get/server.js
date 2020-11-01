@@ -11,7 +11,7 @@ server.on('request', (req, res) => {
 
   if (parsedUrl && parsedUrl.length > 1) {
     res.statusCode = 400;
-    res.end('Nested path detected');
+    return res.end('Nested path detected');
   }
 
   const filepath = path.join(__dirname, 'files', pathname);
@@ -23,14 +23,21 @@ server.on('request', (req, res) => {
       readable.on('error', () => {
         if (!fs.existsSync(filepath)) {
           res.statusCode = 404;
-          res.end('File doesnt exist');
+          return res.end('File doesnt exist');
         }
+        res.statusCode = 500;
+        res.end();
         readable.close();
       });
 
       readable.on('end', () => {
         res.statusCode = 200;
         res.end();
+      });
+
+
+      res.on('close', () => {
+        readable.destroy();
       })
 
       readable.pipe(res);
