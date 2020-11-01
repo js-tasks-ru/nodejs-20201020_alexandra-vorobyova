@@ -8,7 +8,6 @@ const server = new http.Server();
 server.on('request', (req, res) => {
   const pathname = url.parse(req.url).pathname.slice(1);
   const parsedUrl = pathname.split('/');
-  console.log('!!!!!', parsedUrl);
 
   if (parsedUrl && parsedUrl.length > 1) {
     res.statusCode = 400;
