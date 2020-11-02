@@ -26,9 +26,11 @@ server.on('request', (req, res) => {
   switch (req.method) {
     case 'POST':
       const writable = fs.createWriteStream(filepath);
-      const limitSizeStream = new LimitSizeStream({ limit: 10000 });
+      const limitSizeStream = new LimitSizeStream({ limit: 1048576 });
 
-      req.pipe(limitSizeStream).on('error', (err) => {
+      req.pipe(limitSizeStream).pipe(writable);
+
+      limitSizeStream.on('error', (err) => {
         fs.unlinkSync(filepath);
         if (err instanceof(LimitExceededError)) {
           res.statusCode = 413;
@@ -36,16 +38,17 @@ server.on('request', (req, res) => {
         }
         res.statusCode = 500;
         res.end();
-      }).pipe(writable).on('close', () => {
-        res.statusCode = 201;
-        res.end();
       });
 
       req.on('close', () => {
         if (req.aborted) {
           fs.unlinkSync(filepath);
-          return;
         }
+      })
+
+      writable.on('close', () => {
+        res.statusCode = 201;
+        res.end();
       })
 
       break;
