@@ -34,10 +34,10 @@ server.on('request', (req, res) => {
         fs.unlinkSync(filepath);
         if (err instanceof(LimitExceededError)) {
           res.statusCode = 413;
-          return res.end();
+          return res.end("file is too big");
         }
         res.statusCode = 500;
-        res.end();
+        res.end("Error");
       });
 
       req.on('close', () => {
