@@ -57,22 +57,19 @@ router.use(async (ctx, next) => {
     return next();
   }
 
-  try {
-    const session = await Session.findOne({ token }).populate('user');
-    if (!session) {
-      ctx.status = 401;
-      ctx.body = { error: 'Неверный аутентификационный токен' };
-      return;
-    }
-
-    session.lastVisit = Date.now();
-
-    await session.save();
-
-    ctx.user = session.user;
-  } catch(err) {
-    ctx.throw(err);
+  const session = await Session.findOne({ token }).populate('user');
+  if (!session) {
+    ctx.status = 401;
+    ctx.body = { error: 'Неверный аутентификационный токен' };
+    return;
   }
+
+  session.lastVisit = Date.now();
+
+  await session.save();
+
+  ctx.user = session.user;
+  
   return next();
 });
 
